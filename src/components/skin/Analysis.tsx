@@ -1,5 +1,7 @@
 import { ScoreRing } from "./ScoreRing";
-import { metrics, products } from "./data";
+import { ProductCard } from "./ProductCard";
+import { metrics, placeholderProducts, type Product } from "./data";
+
 
 function severityLabel(score: number, positive?: boolean) {
   const good = positive ? score >= 65 : score <= 30;
@@ -9,8 +11,10 @@ function severityLabel(score: number, positive?: boolean) {
   return positive ? "Needs care" : "Elevated";
 }
 
-export function Analysis() {
+export function Analysis({ products }: { products?: Product[] } = {}) {
   const overall = metrics.find((m) => m.key === "health")!;
+  const items: Product[] = products?.length ? products : placeholderProducts;
+
 
   return (
     <div className="space-y-14">
@@ -50,7 +54,19 @@ export function Analysis() {
                 <ScoreRing value={metric.score} tone={metric.positive ? "leaf" : "primary"} />
               </div>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{metric.note}</p>
-              <p className="mt-3 text-xs text-muted-foreground/80">Confidence {metric.confidence}%</p>
+              <div className="mt-4">
+                <div className="mb-1.5 flex items-center justify-between text-[11px] text-muted-foreground/90">
+                  <span>Confidence</span>
+                  <span>{metric.confidence}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary-gradient transition-smooth"
+                    style={{ width: `${metric.confidence}%` }}
+                  />
+                </div>
+              </div>
+
             </article>
           ))}
         </div>
@@ -58,47 +74,23 @@ export function Analysis() {
 
       <section>
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <h3 className="text-2xl">Recommended Bonji products</h3>
-          <p className="text-sm text-muted-foreground">Curated for your results</p>
+          <div>
+            <h3 className="text-2xl">Recommended Products</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              These cards are populated dynamically from your analysis results.
+            </p>
+          </div>
+          <span className="rounded-full border border-dashed border-border bg-ivory/70 px-4 py-1.5 text-[11px] tracking-wide text-muted-foreground">
+            Awaiting backend data
+          </span>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {products.map((product, i) => (
-            <article
-              key={product.name}
-              className="animate-rise-in group overflow-hidden rounded-4xl border border-border/70 bg-card shadow-soft transition-smooth hover:-translate-y-1.5 hover:shadow-lift"
-              style={{ animationDelay: `${i * 90}ms` }}
-            >
-              <div className="overflow-hidden bg-cream">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  loading="lazy"
-                  width={768}
-                  height={768}
-                  className="h-56 w-full object-cover transition-smooth group-hover:scale-105"
-                />
-              </div>
-              <div className="space-y-4 p-6">
-                <h4 className="font-display text-xl">{product.name}</h4>
-                <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
-                <ul className="flex flex-wrap gap-2">
-                  {product.benefits.map((benefit) => (
-                    <li
-                      key={benefit}
-                      className="rounded-full bg-accent px-3 py-1 text-[11px] font-medium text-accent-foreground"
-                    >
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <button className="w-full rounded-full bg-primary-gradient px-5 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-smooth hover:brightness-105 active:scale-[0.98]">
-                  View Product
-                </button>
-              </div>
-            </article>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((product, i) => (
+            <ProductCard key={product.id} product={product} index={i} />
           ))}
         </div>
       </section>
+
     </div>
   );
 }
