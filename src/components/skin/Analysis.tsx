@@ -11,8 +11,10 @@ function severityLabel(score: number, positive?: boolean) {
   return positive ? "Needs care" : "Elevated";
 }
 
-export function Analysis() {
+export function Analysis({ products }: { products?: Product[] } = {}) {
   const overall = metrics.find((m) => m.key === "health")!;
+  const items: Product[] = products?.length ? products : placeholderProducts;
+
 
   return (
     <div className="space-y-14">
