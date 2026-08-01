@@ -21,23 +21,52 @@ export const metrics: Metric[] = [
   { key: "health", label: "Skin Health", score: 78, confidence: 94, note: "Healthy barrier function", positive: true },
 ];
 
-export const products = [
+export type Product = {
+  id: string;
+  name: string;
+  image?: string | null;
+  concern: string;
+  ingredients: string[];
+  benefits: string[];
+  description: string;
+  price?: string | null;
+  url?: string | null;
+};
+
+/**
+ * Placeholder data only — this section is designed to be populated
+ * dynamically from the backend using the AI skin analysis results.
+ */
+export const placeholderProducts: Product[] = [
   {
-    name: "Golden Glow Serum",
-    image: serum,
-    description: "A lightweight vitamin C serum that softens pigmentation and revives dull skin.",
-    benefits: ["Brightens tone", "Fades dark spots", "Antioxidant rich"],
+    id: "placeholder-1",
+    name: "Product Name",
+    image: null,
+    concern: "Concern Addressed",
+    ingredients: ["Key Ingredient", "Key Ingredient"],
+    benefits: ["Benefit", "Benefit", "Benefit"],
+    description: "Short product description will appear here once recommendations are loaded.",
+    price: "₹—",
   },
   {
-    name: "Ceramide Repair Cream",
-    image: cream,
-    description: "A nourishing barrier cream with ceramides and squalane for lasting comfort.",
-    benefits: ["Deep hydration", "Calms redness", "Barrier support"],
+    id: "placeholder-2",
+    name: "Product Name",
+    image: null,
+    concern: "Concern Addressed",
+    ingredients: ["Key Ingredient", "Key Ingredient"],
+    benefits: ["Benefit", "Benefit"],
+    description: "Short product description will appear here once recommendations are loaded.",
+    price: "₹—",
   },
   {
-    name: "Gentle Clarifying Cleanser",
-    image: cleanser,
-    description: "A pH-balanced daily cleanser that clears excess oil without stripping moisture.",
-    benefits: ["Unclogs pores", "Balances oil", "Non-drying"],
+    id: "placeholder-3",
+    name: "Product Name",
+    image: null,
+    concern: "Concern Addressed",
+    ingredients: ["Key Ingredient", "Key Ingredient"],
+    benefits: ["Benefit", "Benefit", "Benefit"],
+    description: "Short product description will appear here once recommendations are loaded.",
+    price: "₹—",
   },
 ];
+
