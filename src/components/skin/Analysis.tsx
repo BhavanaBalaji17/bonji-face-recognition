@@ -52,7 +52,19 @@ export function Analysis() {
                 <ScoreRing value={metric.score} tone={metric.positive ? "leaf" : "primary"} />
               </div>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{metric.note}</p>
-              <p className="mt-3 text-xs text-muted-foreground/80">Confidence {metric.confidence}%</p>
+              <div className="mt-4">
+                <div className="mb-1.5 flex items-center justify-between text-[11px] text-muted-foreground/90">
+                  <span>Confidence</span>
+                  <span>{metric.confidence}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary-gradient transition-smooth"
+                    style={{ width: `${metric.confidence}%` }}
+                  />
+                </div>
+              </div>
+
             </article>
           ))}
         </div>
