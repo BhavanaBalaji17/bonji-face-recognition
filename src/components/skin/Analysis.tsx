@@ -72,47 +72,23 @@ export function Analysis() {
 
       <section>
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <h3 className="text-2xl">Recommended Bonji products</h3>
-          <p className="text-sm text-muted-foreground">Curated for your results</p>
+          <div>
+            <h3 className="text-2xl">Recommended Products</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              These cards are populated dynamically from your analysis results.
+            </p>
+          </div>
+          <span className="rounded-full border border-dashed border-border bg-ivory/70 px-4 py-1.5 text-[11px] tracking-wide text-muted-foreground">
+            Awaiting backend data
+          </span>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {products.map((product, i) => (
-            <article
-              key={product.name}
-              className="animate-rise-in group overflow-hidden rounded-4xl border border-border/70 bg-card shadow-soft transition-smooth hover:-translate-y-1.5 hover:shadow-lift"
-              style={{ animationDelay: `${i * 90}ms` }}
-            >
-              <div className="overflow-hidden bg-cream">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  loading="lazy"
-                  width={768}
-                  height={768}
-                  className="h-56 w-full object-cover transition-smooth group-hover:scale-105"
-                />
-              </div>
-              <div className="space-y-4 p-6">
-                <h4 className="font-display text-xl">{product.name}</h4>
-                <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>
-                <ul className="flex flex-wrap gap-2">
-                  {product.benefits.map((benefit) => (
-                    <li
-                      key={benefit}
-                      className="rounded-full bg-accent px-3 py-1 text-[11px] font-medium text-accent-foreground"
-                    >
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
-                <button className="w-full rounded-full bg-primary-gradient px-5 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-smooth hover:brightness-105 active:scale-[0.98]">
-                  View Product
-                </button>
-              </div>
-            </article>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((product, i) => (
+            <ProductCard key={product.id} product={product} index={i} />
           ))}
         </div>
       </section>
+
     </div>
   );
 }
