@@ -1,5 +1,7 @@
 import { ScoreRing } from "./ScoreRing";
-import { metrics, products } from "./data";
+import { ProductCard } from "./ProductCard";
+import { metrics, placeholderProducts, type Product } from "./data";
+
 
 function severityLabel(score: number, positive?: boolean) {
   const good = positive ? score >= 65 : score <= 30;
