@@ -13,10 +13,10 @@ export const Route = createFileRoute("/")({
         content:
           "Upload a selfie or use your camera for an instant AI skin analysis: acne, pigmentation, hydration and more, with Bonji product recommendations.",
       },
-      { property: "og:title", content: "Bonji AI Skin Analysis" },
+      { property: "og:title", content: "Bonji AI Skin Analysis — Personalised Skin Assessment" },
       {
         property: "og:description",
-        content: "Instant AI-powered facial skin assessment with personalised Bonji skincare recommendations.",
+        content: "Upload a selfie or use your camera for an instant AI skin analysis: acne, pigmentation, hydration and more, with Bonji product recommendations.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

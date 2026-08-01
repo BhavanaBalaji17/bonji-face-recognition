@@ -77,13 +77,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Bonji AI Skin Analysis" },
-      { name: "description", content: "AI-powered facial skin analysis by Bonji." },
+      { title: "Bonji AI Skin Analysis — Personalised Skin Assessment" },
+      { name: "description", content: "Upload a selfie or use your camera for an instant AI skin analysis: acne, pigmentation, hydration and more, with Bonji product recommendations." },
       { name: "author", content: "Bonji" },
-      { property: "og:title", content: "Bonji AI Skin Analysis" },
-      { property: "og:description", content: "AI-powered facial skin analysis by Bonji." },
+      { property: "og:title", content: "Bonji AI Skin Analysis — Personalised Skin Assessment" },
+      { property: "og:description", content: "Upload a selfie or use your camera for an instant AI skin analysis: acne, pigmentation, hydration and more, with Bonji product recommendations." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Bonji AI Skin Analysis — Personalised Skin Assessment" },
+      { name: "twitter:description", content: "Upload a selfie or use your camera for an instant AI skin analysis: acne, pigmentation, hydration and more, with Bonji product recommendations." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/000d27bb-fbfc-4f4a-89c5-9ca503fffd7f/id-preview-c62a8d9c--f28b4ac3-1984-4b9f-87ed-36a338d6fbe7.lovable.app-1785586993334.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/000d27bb-fbfc-4f4a-89c5-9ca503fffd7f/id-preview-c62a8d9c--f28b4ac3-1984-4b9f-87ed-36a338d6fbe7.lovable.app-1785586993334.png" },
     ],
     links: [
       {
