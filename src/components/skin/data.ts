@@ -1,6 +1,3 @@
-import serum from "@/assets/product-serum.jpg";
-import cream from "@/assets/product-cream.jpg";
-import cleanser from "@/assets/product-cleanser.jpg";
 
 export type Metric = {
   key: string;
