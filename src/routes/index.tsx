@@ -26,14 +26,16 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "idle" | "analyzing" | "done";
+type Stage = "idle" | "ready" | "analyzing" | "done" | "error";
 
-const steps = ["Detecting facial landmarks", "Mapping skin texture", "Scoring 10 skin signals"];
+const steps = ["Detecting facial landmarks", "Mapping skin texture", "Scoring skin signals"];
 
 function Index() {
   const [image, setImage] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [step, setStep] = useState(0);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
@@ -42,20 +44,32 @@ function Index() {
   const streamRef = useRef<MediaStream | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  const startAnalysis = useCallback((src: string) => {
+  const selectImage = useCallback((src: string) => {
     setImage(src);
+    setResult(null);
+    setError(null);
+    setStage("ready");
+  }, []);
+
+  const runAnalysis = useCallback(async () => {
+    if (!image) return;
     setStage("analyzing");
     setStep(0);
-  }, []);
+    setError(null);
+    try {
+      const data = await analyzeImage(image);
+      setResult(data);
+      setStage("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reach the analysis service.");
+      setStage("error");
+    }
+  }, [image]);
 
   useEffect(() => {
     if (stage !== "analyzing") return;
     const stepTimers = steps.map((_, i) => window.setTimeout(() => setStep(i), i * 1100));
-    const done = window.setTimeout(() => setStage("done"), steps.length * 1100 + 600);
-    return () => {
-      stepTimers.forEach(window.clearTimeout);
-      window.clearTimeout(done);
-    };
+    return () => stepTimers.forEach(window.clearTimeout);
   }, [stage]);
 
   useEffect(() => {
@@ -63,6 +77,7 @@ function Index() {
       resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [stage]);
+
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
