@@ -174,7 +174,11 @@ export async function analyzeImage(imageDataUrl: string, signal?: AbortSignal): 
   form.append("file", blob, `selfie.${ext}`);
   form.append("image", blob, `selfie.${ext}`);
 
-  const response = await fetch(`${API_BASE_URL}/analyze`, { method: "POST", body: form, signal: signal ?? null });
+  const response = await fetch(`${API_BASE_URL}/api/recommend`, {
+    method: "POST",
+    body: form,
+    signal: signal ?? null,
+  });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(`Analysis failed (${response.status}). ${text.slice(0, 200)}`.trim());
