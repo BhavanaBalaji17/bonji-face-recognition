@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import logo from "@/assets/bonji-logo.png";
 import botanical from "@/assets/botanical-bg.png";
 import { Analysis } from "@/components/skin/Analysis";
+import { analyzeImage, type AnalysisResult } from "@/lib/analysis-api";
 
 export const Route = createFileRoute("/")({
   head: () => ({
