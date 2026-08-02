@@ -72,11 +72,23 @@ export function Analysis({ result }: { result: AnalysisResult }) {
               <ul className="flex flex-wrap gap-2 pt-1">
                 {result.concerns.map((concern) => (
                   <li
-                    key={concern}
+                    key={concern.id}
                     className="rounded-full bg-ivory/80 px-3 py-1 text-[11px] font-medium text-foreground"
                   >
-                    {concern}
+                    {concern.id.replace(/([a-z])([A-Z])/g, "$1 $2")} · {concern.severity} ·{" "}
+                    {Math.round(concern.confidence * 100)}%
                   </li>
+                ))}
+              </ul>
+            ) : null}
+            <p className="pt-1 text-[11px] text-muted-foreground">
+              Capture confidence {result.captureConfidence}%
+              {result.completeness ? ` · ${Math.round(result.completeness.ratio * 100)}% of metrics measured` : ""}
+            </p>
+            {result.warnings.length ? (
+              <ul className="space-y-1 pt-1 text-[11px] text-muted-foreground">
+                {result.warnings.map((w) => (
+                  <li key={w.code}>⚠ {w.hint ?? w.code}</li>
                 ))}
               </ul>
             ) : null}
