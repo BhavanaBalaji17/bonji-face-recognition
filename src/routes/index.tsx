@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import logo from "@/assets/bonji-logo.png";
 import botanical from "@/assets/botanical-bg.png";
 import { Analysis } from "@/components/skin/Analysis";
+import { analyzeImage, type AnalysisResult } from "@/lib/analysis-api";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,14 +26,16 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-type Stage = "idle" | "analyzing" | "done";
+type Stage = "idle" | "ready" | "analyzing" | "done" | "error";
 
-const steps = ["Detecting facial landmarks", "Mapping skin texture", "Scoring 10 skin signals"];
+const steps = ["Detecting facial landmarks", "Mapping skin texture", "Scoring skin signals"];
 
 function Index() {
   const [image, setImage] = useState<string | null>(null);
   const [stage, setStage] = useState<Stage>("idle");
   const [step, setStep] = useState(0);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
@@ -41,20 +44,32 @@ function Index() {
   const streamRef = useRef<MediaStream | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  const startAnalysis = useCallback((src: string) => {
+  const selectImage = useCallback((src: string) => {
     setImage(src);
+    setResult(null);
+    setError(null);
+    setStage("ready");
+  }, []);
+
+  const runAnalysis = useCallback(async () => {
+    if (!image) return;
     setStage("analyzing");
     setStep(0);
-  }, []);
+    setError(null);
+    try {
+      const data = await analyzeImage(image);
+      setResult(data);
+      setStage("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not reach the analysis service.");
+      setStage("error");
+    }
+  }, [image]);
 
   useEffect(() => {
     if (stage !== "analyzing") return;
     const stepTimers = steps.map((_, i) => window.setTimeout(() => setStep(i), i * 1100));
-    const done = window.setTimeout(() => setStage("done"), steps.length * 1100 + 600);
-    return () => {
-      stepTimers.forEach(window.clearTimeout);
-      window.clearTimeout(done);
-    };
+    return () => stepTimers.forEach(window.clearTimeout);
   }, [stage]);
 
   useEffect(() => {
@@ -62,6 +77,7 @@ function Index() {
       resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [stage]);
+
 
   const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -92,8 +108,8 @@ function Index() {
     canvas.height = video.videoHeight || 960;
     canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
     stopCamera();
-    startAnalysis(canvas.toDataURL("image/jpeg", 0.92));
-  }, [startAnalysis, stopCamera]);
+    selectImage(canvas.toDataURL("image/jpeg", 0.92));
+  }, [selectImage, stopCamera]);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
 
@@ -101,14 +117,17 @@ function Index() {
     const file = event.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => startAnalysis(String(reader.result));
+    reader.onload = () => selectImage(String(reader.result));
     reader.readAsDataURL(file);
   };
 
   const reset = () => {
     setImage(null);
+    setResult(null);
+    setError(null);
     setStage("idle");
   };
+
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-hero-gradient">
@@ -161,7 +180,7 @@ function Index() {
             <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
           </div>
 
-          <p className="mt-5 text-xs text-muted-foreground">Your photo stays on your device. Nothing is stored.</p>
+          <p className="mt-5 text-xs text-muted-foreground">Your photo is sent securely for analysis only.</p>
         </section>
 
         {image ? (
@@ -208,29 +227,45 @@ function Index() {
                   </>
                 ) : (
                   <>
-                    <h2 className="text-2xl">Your photo</h2>
+                    <h2 className="text-2xl">{stage === "done" ? "Your photo" : "Ready to analyse"}</h2>
                     <p className="text-sm leading-relaxed text-muted-foreground">
                       Good lighting and a clear, makeup-free face give the most accurate reading.
                     </p>
-                    <button
-                      onClick={reset}
-                      className="rounded-full border border-border bg-ivory px-6 py-3 text-sm font-semibold shadow-soft transition-smooth hover:bg-primary-soft"
-                    >
-                      Try another photo
-                    </button>
+                    {error ? (
+                      <p className="rounded-2xl border border-border bg-ivory/70 p-4 text-sm text-foreground">
+                        {error}
+                      </p>
+                    ) : null}
+                    <div className="flex flex-wrap gap-3">
+                      {stage !== "done" ? (
+                        <button
+                          onClick={runAnalysis}
+                          className="rounded-full bg-primary-gradient px-7 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-smooth hover:-translate-y-0.5 hover:brightness-105"
+                        >
+                          {stage === "error" ? "Retry analysis" : "Analyze"}
+                        </button>
+                      ) : null}
+                      <button
+                        onClick={reset}
+                        className="rounded-full border border-border bg-ivory px-6 py-3 text-sm font-semibold shadow-soft transition-smooth hover:bg-primary-soft"
+                      >
+                        Try another photo
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
             </div>
 
-            {stage === "done" ? (
+            {stage === "done" && result ? (
               <div className="mt-16">
-                <Analysis />
+                <Analysis result={result} />
               </div>
             ) : null}
           </section>
         ) : null}
       </main>
+
 
       {cameraOpen ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4 backdrop-blur-sm">
