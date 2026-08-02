@@ -91,10 +91,6 @@ function Index() {
 
 
   useEffect(() => {
-    if (stage !== "analyzing") return;
-    const stepTimers = steps.map((_, i) => window.setTimeout(() => setStep(i), i * 1100));
-    return () => stepTimers.forEach(window.clearTimeout);
-  }, [stage]);
 
   useEffect(() => {
     if (stage === "done") {
