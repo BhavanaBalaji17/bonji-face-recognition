@@ -91,8 +91,6 @@ function Index() {
 
 
   useEffect(() => {
-
-  useEffect(() => {
     if (stage === "done") {
       resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
