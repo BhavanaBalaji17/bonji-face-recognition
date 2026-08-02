@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import logo from "@/assets/bonji-logo.png";
 import botanical from "@/assets/botanical-bg.png";
 import { Analysis } from "@/components/skin/Analysis";
-import { analyzeImage, type AnalysisResult } from "@/lib/analysis-api";
+import { buildAnalysis, fetchRecommendations, type AnalysisResult } from "@/lib/analysis-api";
+import { scanImageDataUrl } from "@/lib/scanner-client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
