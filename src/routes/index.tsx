@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
 
 type Stage = "idle" | "ready" | "analyzing" | "done" | "error";
 
-const steps = ["Detecting facial landmarks", "Mapping skin texture", "Scoring skin signals"];
+const steps = ["Loading the analysis engine", "Detecting landmarks & regions", "Measuring skin and hair", "Matching Bonji products"];
 
 function Index() {
   const [image, setImage] = useState<string | null>(null);
@@ -58,14 +58,37 @@ function Index() {
     setStep(0);
     setError(null);
     try {
-      const data = await analyzeImage(image);
-      setResult(data);
+      setStep(1);
+      const scan = await scanImageDataUrl(image);
+      if (!scan.ok) {
+        throw new Error(
+          scan.reason === "no-face-detected"
+            ? "We couldn't detect a face in that photo. Try a well-lit, front-facing selfie."
+            : `Scan failed: ${scan.reason ?? "unknown reason"}`,
+        );
+      }
+      setStep(2);
+
+      let products: Awaited<ReturnType<typeof fetchRecommendations>> = [];
+      let productsError: string | null = null;
+      setStep(3);
+      try {
+        products = await fetchRecommendations(scan.concerns);
+      } catch (err) {
+        productsError =
+          err instanceof Error
+            ? `Couldn't load product recommendations. ${err.message}`
+            : "Couldn't load product recommendations.";
+      }
+
+      setResult(buildAnalysis(scan, products, productsError));
       setStage("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reach the analysis service.");
+      setError(err instanceof Error ? err.message : "Analysis failed.");
       setStage("error");
     }
   }, [image]);
+
 
   useEffect(() => {
     if (stage !== "analyzing") return;
