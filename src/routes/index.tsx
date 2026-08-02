@@ -108,8 +108,8 @@ function Index() {
     canvas.height = video.videoHeight || 960;
     canvas.getContext("2d")?.drawImage(video, 0, 0, canvas.width, canvas.height);
     stopCamera();
-    startAnalysis(canvas.toDataURL("image/jpeg", 0.92));
-  }, [startAnalysis, stopCamera]);
+    selectImage(canvas.toDataURL("image/jpeg", 0.92));
+  }, [selectImage, stopCamera]);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
 
@@ -117,14 +117,17 @@ function Index() {
     const file = event.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => startAnalysis(String(reader.result));
+    reader.onload = () => selectImage(String(reader.result));
     reader.readAsDataURL(file);
   };
 
   const reset = () => {
     setImage(null);
+    setResult(null);
+    setError(null);
     setStage("idle");
   };
+
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-hero-gradient">
