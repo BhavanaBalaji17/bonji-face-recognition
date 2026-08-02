@@ -1,3 +1,5 @@
+import type { ScanConcern, ScanResult, ScanWarning } from "@/face-scanner/scanner";
+
 export type Metric = {
   key: string;
   label: string;
@@ -24,16 +26,21 @@ export type AnalysisResult = {
   overall?: Metric | null;
   skin: Metric[];
   hair: Metric[];
-  concerns: string[];
+  concerns: ScanConcern[];
+  warnings: ScanWarning[];
+  notes: string[];
+  completeness?: ScanResult["completeness"];
+  captureConfidence: number;
   products: Product[];
-  raw: unknown;
+  productsError?: string | null;
+  raw: ScanResult;
 };
 
 export const API_BASE_URL: string =
   (import.meta.env['VITE_ANALYSIS_API_URL'] as string | undefined)?.replace(/\/$/, "") ??
   "http://localhost:8000";
 
-const POSITIVE_KEYS = ["hydration", "health", "moisture", "elasticity", "shine", "density", "strength", "smoothness"];
+const POSITIVE_KEYS = ["shine", "hydration", "health", "moisture", "elasticity", "smoothness"];
 
 function titleize(key: string) {
   return key
@@ -43,60 +50,35 @@ function titleize(key: string) {
     .trim();
 }
 
-function toPercent(value: unknown): number | null {
-  const n = typeof value === "string" ? Number(value) : typeof value === "number" ? value : NaN;
-  if (!Number.isFinite(n)) return null;
-  const pct = n >= 0 && n <= 1 ? n * 100 : n;
-  return Math.max(0, Math.min(100, Math.round(pct)));
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** Accepts either { acne: 0.24 }, { acne: { score, confidence, note } } or [{ name/label, score, ... }]. */
-function normalizeMetrics(input: unknown): Metric[] {
-  if (!input) return [];
-  const entries: Array<[string, unknown]> = Array.isArray(input)
-    ? input.map((item, i) => {
-        const rec = isRecord(item) ? item : {};
-        const name = (rec['key'] ?? rec['name'] ?? rec['label'] ?? `metric_${i}`) as string;
-        return [String(name), item];
-      })
-    : isRecord(input)
-      ? Object.entries(input)
-      : [];
+const pct = (v: number) => Math.max(0, Math.min(100, Math.round(v * 100)));
 
-  const metrics: Metric[] = [];
-  for (const [key, value] of entries) {
-    let score: number | null = null;
-    let confidence: number | null = null;
-    let note: string | null = null;
-
-    if (isRecord(value)) {
-      score = toPercent(value['score'] ?? value['value'] ?? value['severity'] ?? value['level'] ?? value['percentage']);
-      confidence = toPercent(value['confidence'] ?? value['certainty'] ?? value['probability']);
-      const n = value['note'] ?? value['description'] ?? value['detail'] ?? value['comment'];
-      note = typeof n === "string" ? n : null;
-    } else {
-      score = toPercent(value);
-    }
-    if (score === null) continue;
-
+function metricsFrom(
+  scores: Record<string, number> | undefined,
+  area: "skin" | "hair",
+  concerns: ScanConcern[],
+  captureConfidence: number,
+): Metric[] {
+  if (!scores) return [];
+  return Object.entries(scores).map(([key, score]) => {
+    const concernId = area === "hair" ? `hair${key.charAt(0).toUpperCase()}${key.slice(1)}` : key;
+    const concern = concerns.find((c) => c.id === concernId);
     const lower = key.toLowerCase();
-    metrics.push({
-      key,
+    return {
+      key: `${area}:${key}`,
       label: titleize(key),
-      score,
-      confidence,
-      note,
+      score: pct(score),
+      confidence: pct(concern?.confidence ?? captureConfidence),
+      note: concern ? `Flagged as ${concern.severity}` : null,
       positive: POSITIVE_KEYS.some((p) => lower.includes(p)),
-    });
-  }
-  return metrics;
+    };
+  });
 }
 
-function normalizeProducts(input: unknown): Product[] {
+export function normalizeProducts(input: unknown): Product[] {
   if (!Array.isArray(input)) return [];
   return input.filter(isRecord).map((item, i) => {
     const toArray = (v: unknown): string[] =>
@@ -120,68 +102,61 @@ function normalizeProducts(input: unknown): Product[] {
   });
 }
 
-export function normalizeAnalysis(payload: unknown): AnalysisResult {
-  const root = isRecord(payload) ? payload : {};
-  const data = isRecord(root['data']) ? (root['data'] as Record<string, unknown>) : root;
-
-  const skin = normalizeMetrics(
-    data['skin_analysis'] ?? data['skinAnalysis'] ?? data['skin'] ?? data['metrics'] ?? data['scores'],
-  );
-  const hair = normalizeMetrics(data['hair_analysis'] ?? data['hairAnalysis'] ?? data['hair']);
-
-  const overallRaw = data['overall'] ?? data['overall_score'] ?? data['skin_health'] ?? data['overallScore'];
-  let overall: Metric | null = null;
-  if (overallRaw !== undefined && overallRaw !== null) {
-    overall = normalizeMetrics({ overall: overallRaw })[0] ?? null;
-    if (overall) overall = { ...overall, label: "Overall", positive: true };
-  }
-  if (!overall) {
-    const health = skin.find((m) => m.key.toLowerCase().includes("health"));
-    if (health) overall = { ...health, label: "Overall", positive: true };
-  }
-
-  const concernsRaw = data['concerns'] ?? data['detected_concerns'] ?? data['issues'];
-  const concerns = Array.isArray(concernsRaw)
-    ? concernsRaw
-        .map((c) => (typeof c === "string" ? c : isRecord(c) ? String(c['name'] ?? c['label'] ?? "") : ""))
-        .filter(Boolean)
-    : [];
-
-  const summaryRaw = data['summary'] ?? data['description'] ?? data['message'];
-
-  return {
-    summary: typeof summaryRaw === "string" ? summaryRaw : null,
-    overall,
-    skin,
-    hair,
-    concerns,
-    products: normalizeProducts(
-      data['products'] ?? data['recommendations'] ?? data['recommended_products'] ?? data['recommendedProducts'],
-    ),
-    raw: payload,
-  };
-}
-
-async function dataUrlToBlob(dataUrl: string): Promise<Blob> {
-  const res = await fetch(dataUrl);
-  return res.blob();
-}
-
-export async function analyzeImage(imageDataUrl: string, signal?: AbortSignal): Promise<AnalysisResult> {
-  const blob = await dataUrlToBlob(imageDataUrl);
-  const form = new FormData();
-  const ext = blob.type === "image/png" ? "png" : "jpg";
-  form.append("file", blob, `selfie.${ext}`);
-  form.append("image", blob, `selfie.${ext}`);
-
+/** Sends the scan concerns to the Python backend for Bonji product recommendations. */
+export async function fetchRecommendations(concerns: ScanConcern[], signal?: AbortSignal): Promise<Product[]> {
   const response = await fetch(`${API_BASE_URL}/api/recommend`, {
     method: "POST",
-    body: form,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ concerns }),
     signal: signal ?? null,
   });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(`Analysis failed (${response.status}). ${text.slice(0, 200)}`.trim());
+    throw new Error(`Recommendations failed (${response.status}). ${text.slice(0, 200)}`.trim());
   }
-  return normalizeAnalysis(await response.json());
+  const payload: unknown = await response.json();
+  const root = isRecord(payload) ? payload : {};
+  const data = isRecord(root['data']) ? (root['data'] as Record<string, unknown>) : root;
+  return normalizeProducts(
+    Array.isArray(payload)
+      ? payload
+      : data['products'] ?? data['recommendations'] ?? data['recommended_products'] ?? data['recommendedProducts'],
+  );
+}
+
+export function buildAnalysis(scan: ScanResult, products: Product[], productsError?: string | null): AnalysisResult {
+  const captureConfidence = scan.confidence ?? 0;
+  const skin = metricsFrom(scan.skin?.scores, "skin", scan.concerns, captureConfidence);
+  const hair = metricsFrom(scan.hair?.scores, "hair", scan.concerns, captureConfidence);
+
+  const negatives = skin.filter((m) => !m.positive);
+  const overall: Metric | null = negatives.length
+    ? {
+        key: "overall",
+        label: "Overall",
+        score: Math.round(100 - negatives.reduce((a, m) => a + m.score, 0) / negatives.length),
+        confidence: pct(captureConfidence),
+        positive: true,
+      }
+    : null;
+
+  const top = scan.concerns.slice(0, 3).map((c) => titleize(c.id).toLowerCase());
+  const summary = scan.concerns.length
+    ? `We detected ${scan.concerns.length} signal${scan.concerns.length > 1 ? "s" : ""} worth attention — most notably ${top.join(", ")}.`
+    : "No concerns crossed the flagging threshold in this capture.";
+
+  return {
+    summary,
+    overall,
+    skin,
+    hair,
+    concerns: scan.concerns,
+    warnings: scan.warnings ?? [],
+    notes: scan.notes ?? [],
+    completeness: scan.completeness,
+    captureConfidence: pct(captureConfidence),
+    products,
+    productsError: productsError ?? null,
+    raw: scan,
+  };
 }
