@@ -227,29 +227,45 @@ function Index() {
                   </>
                 ) : (
                   <>
-                    <h2 className="text-2xl">Your photo</h2>
+                    <h2 className="text-2xl">{stage === "done" ? "Your photo" : "Ready to analyse"}</h2>
                     <p className="text-sm leading-relaxed text-muted-foreground">
                       Good lighting and a clear, makeup-free face give the most accurate reading.
                     </p>
-                    <button
-                      onClick={reset}
-                      className="rounded-full border border-border bg-ivory px-6 py-3 text-sm font-semibold shadow-soft transition-smooth hover:bg-primary-soft"
-                    >
-                      Try another photo
-                    </button>
+                    {error ? (
+                      <p className="rounded-2xl border border-border bg-ivory/70 p-4 text-sm text-foreground">
+                        {error}
+                      </p>
+                    ) : null}
+                    <div className="flex flex-wrap gap-3">
+                      {stage !== "done" ? (
+                        <button
+                          onClick={runAnalysis}
+                          className="rounded-full bg-primary-gradient px-7 py-3 text-sm font-semibold text-primary-foreground shadow-glow transition-smooth hover:-translate-y-0.5 hover:brightness-105"
+                        >
+                          {stage === "error" ? "Retry analysis" : "Analyze"}
+                        </button>
+                      ) : null}
+                      <button
+                        onClick={reset}
+                        className="rounded-full border border-border bg-ivory px-6 py-3 text-sm font-semibold shadow-soft transition-smooth hover:bg-primary-soft"
+                      >
+                        Try another photo
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
             </div>
 
-            {stage === "done" ? (
+            {stage === "done" && result ? (
               <div className="mt-16">
-                <Analysis />
+                <Analysis result={result} />
               </div>
             ) : null}
           </section>
         ) : null}
       </main>
+
 
       {cameraOpen ? (
         <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/40 p-4 backdrop-blur-sm">
