@@ -180,7 +180,7 @@ function Index() {
             <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
           </div>
 
-          <p className="mt-5 text-xs text-muted-foreground">Your photo stays on your device. Nothing is stored.</p>
+          <p className="mt-5 text-xs text-muted-foreground">Your photo is sent securely for analysis only.</p>
         </section>
 
         {image ? (
