@@ -4,6 +4,9 @@ import logo from "@/assets/bonji-logo.png";
 import botanical from "@/assets/botanical-bg.png";
 import { Analysis } from "@/components/skin/Analysis";
 import { buildAnalysis, fetchRecommendations, type AnalysisResult } from "@/lib/analysis-api";
+import { getBonjiCatalog } from "@/lib/bonji-catalog.functions";
+import type { BonjiProduct } from "@/lib/bonji-catalog-types";
+import { resolveProducts } from "@/lib/catalog-match";
 import { scanImageDataUrl } from "@/lib/scanner-client";
 
 export const Route = createFileRoute("/")({
