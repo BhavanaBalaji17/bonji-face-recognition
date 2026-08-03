@@ -1,14 +1,4 @@
-export type BonjiProduct = {
-  id: string;
-  title: string;
-  handle: string;
-  description: string | null;
-  price: string | null;
-  image: string | null;
-  url: string;
-  tags: string[];
-  productType: string | null;
-};
+import type { BonjiProduct } from "./bonji-catalog-types";
 
 const FEED_URL = "https://bonji.in/products.json?limit=250";
 

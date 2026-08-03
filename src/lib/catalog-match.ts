@@ -1,4 +1,4 @@
-import type { BonjiProduct } from "./bonji-catalog.server";
+import type { BonjiProduct } from "./bonji-catalog-types";
 import type { Product } from "./analysis-api";
 
 export type { BonjiProduct };
