@@ -16,15 +16,12 @@ export function ProductCard({ product, index = 0 }: Props) {
             loading="lazy"
             className="h-full w-full object-cover transition-smooth group-hover:scale-105"
           />
-        ) : (
-          <div className="grid h-full w-full place-items-center bg-card-gradient">
-            <span className="rounded-full border border-dashed border-border px-4 py-2 text-xs tracking-wide text-muted-foreground">
-              No image
-            </span>
-          </div>
-        )}
+        ) : null}
+        <span className="absolute left-4 top-4 rounded-full bg-primary-gradient px-3 py-1 text-[11px] font-semibold text-primary-foreground shadow-glow">
+          Recommended for you
+        </span>
         {product.concern ? (
-          <span className="absolute left-4 top-4 rounded-full bg-ivory/85 px-3 py-1 text-[11px] font-medium text-foreground backdrop-blur">
+          <span className="absolute bottom-4 left-4 rounded-full bg-ivory/85 px-3 py-1 text-[11px] font-medium text-foreground backdrop-blur">
             {product.concern}
           </span>
         ) : null}
@@ -35,6 +32,7 @@ export function ProductCard({ product, index = 0 }: Props) {
           <h4 className="font-display text-xl">{product.name}</h4>
           {product.price ? <span className="text-sm font-semibold text-foreground">{product.price}</span> : null}
         </div>
+
 
         {product.description ? (
           <p className="text-sm leading-relaxed text-muted-foreground">{product.description}</p>

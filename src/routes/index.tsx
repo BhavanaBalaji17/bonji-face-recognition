@@ -4,6 +4,9 @@ import logo from "@/assets/bonji-logo.png";
 import botanical from "@/assets/botanical-bg.png";
 import { Analysis } from "@/components/skin/Analysis";
 import { buildAnalysis, fetchRecommendations, type AnalysisResult } from "@/lib/analysis-api";
+import { getBonjiCatalog } from "@/lib/bonji-catalog.functions";
+import type { BonjiProduct } from "@/lib/bonji-catalog-types";
+import { resolveProducts } from "@/lib/catalog-match";
 import { scanImageDataUrl } from "@/lib/scanner-client";
 
 export const Route = createFileRoute("/")({
@@ -44,6 +47,19 @@ function Index() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const catalogRef = useRef<Promise<BonjiProduct[]> | null>(null);
+
+  // Load the live Bonji product feed once on page load and keep it in memory.
+  const loadCatalog = useCallback(() => {
+    catalogRef.current ??= getBonjiCatalog();
+    return catalogRef.current;
+  }, []);
+
+  useEffect(() => {
+    loadCatalog().catch(() => {
+      catalogRef.current = null;
+    });
+  }, [loadCatalog]);
 
   const selectImage = useCallback((src: string) => {
     setImage(src);
@@ -73,7 +89,13 @@ function Index() {
       let productsError: string | null = null;
       setStep(3);
       try {
-        products = await fetchRecommendations(scan.concerns);
+        const [recommended, catalog] = await Promise.all([fetchRecommendations(scan.concerns), loadCatalog()]);
+        products = resolveProducts(recommended, catalog);
+        if (!products.length) {
+          productsError = recommended.length
+            ? "We couldn't match the recommended items to the Bonji product catalogue."
+            : "No product recommendations were returned for this analysis.";
+        }
       } catch (err) {
         productsError =
           err instanceof Error
@@ -87,7 +109,9 @@ function Index() {
       setError(err instanceof Error ? err.message : "Analysis failed.");
       setStage("error");
     }
-  }, [image]);
+  }, [image, loadCatalog]);
+
+
 
 
   useEffect(() => {
