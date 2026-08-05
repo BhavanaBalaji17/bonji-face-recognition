@@ -80,20 +80,28 @@
   --input: oklch(0.91 0.02 92);
   --ring: oklch(0.86 0.11 95);
 
-  --gradient-hero: radial-gradient(
-      120% 90% at 15% 0%,
-      color-mix(in oklab, var(--primary) 34%, transparent) 0%,
-      transparent 55%
+  --shadow-ink: oklch(0.28 0.032 120);
+
+  --grid-line: color-mix(in srgb, oklch(0.55 0.01 100) 22%, transparent);
+  --grid-size: 64px;
+  --gradient-grid: repeating-linear-gradient(
+      to right,
+      var(--grid-line) 0 1px,
+      transparent 1px var(--grid-size)
     ),
+    repeating-linear-gradient(to bottom, var(--grid-line) 0 1px, transparent 1px var(--grid-size));
+
+  --gradient-hero: var(--gradient-grid),
+    radial-gradient(120% 90% at 15% 0%, color-mix(in oklab, var(--primary) 34%, transparent) 0%, transparent 55%),
     radial-gradient(90% 80% at 95% 10%, color-mix(in oklab, var(--leaf-soft) 26%, transparent) 0%, transparent 60%),
     linear-gradient(180deg, var(--ivory) 0%, var(--cream) 100%);
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, color-mix(in oklab, var(--primary) 62%, white) 100%);
   --gradient-card: linear-gradient(160deg, var(--ivory) 0%, color-mix(in oklab, var(--cream) 80%, white) 100%);
 
-  --shadow-soft: 0 2px 8px -4px color-mix(in oklab, var(--foreground) 10%, transparent),
-    0 12px 32px -18px color-mix(in oklab, var(--foreground) 22%, transparent);
-  --shadow-lift: 0 8px 20px -8px color-mix(in oklab, var(--foreground) 14%, transparent),
-    0 28px 60px -30px color-mix(in oklab, var(--foreground) 30%, transparent);
+  --shadow-soft: 0 2px 8px -4px color-mix(in oklab, var(--shadow-ink) 10%, transparent),
+    0 12px 32px -18px color-mix(in oklab, var(--shadow-ink) 22%, transparent);
+  --shadow-lift: 0 8px 20px -8px color-mix(in oklab, var(--shadow-ink) 14%, transparent),
+    0 28px 60px -30px color-mix(in oklab, var(--shadow-ink) 30%, transparent);
   --shadow-glow: 0 18px 46px -18px color-mix(in oklab, var(--primary) 70%, transparent);
 
   --transition-smooth: 400ms cubic-bezier(0.22, 1, 0.36, 1);
