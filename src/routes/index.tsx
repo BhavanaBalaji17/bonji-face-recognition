@@ -189,7 +189,7 @@ function Index() {
       />
 
       <header className="relative mx-auto flex max-w-6xl items-center justify-between px-5 py-6 sm:px-8">
-        <img src={logo} alt="Bonji" width={1152} height={576} className="h-9 w-auto" />
+        <img src={logo} alt="Bonji" width={107} height={36} className="h-9 w-auto" />
         <span className="rounded-full border border-border bg-ivory/70 px-4 py-1.5 text-xs tracking-wide text-muted-foreground backdrop-blur">
           AI Skin Lab
         </span>

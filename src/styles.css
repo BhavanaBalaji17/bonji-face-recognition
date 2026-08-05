@@ -44,26 +44,28 @@
 :root {
   --radius: 1.25rem;
 
+  --ink: #1b1ab5;
+
   --background: oklch(0.985 0.014 95);
-  --foreground: oklch(0.28 0.032 120);
+  --foreground: var(--ink);
 
   --card: oklch(0.995 0.006 95);
-  --card-foreground: oklch(0.28 0.032 120);
+  --card-foreground: var(--ink);
   --popover: oklch(0.995 0.006 95);
-  --popover-foreground: oklch(0.28 0.032 120);
+  --popover-foreground: var(--ink);
 
   --primary: oklch(0.9 0.13 95);
-  --primary-foreground: oklch(0.3 0.045 90);
+  --primary-foreground: var(--ink);
   --primary-soft: oklch(0.955 0.06 96);
 
   --secondary: oklch(0.96 0.018 92);
-  --secondary-foreground: oklch(0.34 0.03 120);
+  --secondary-foreground: var(--ink);
 
   --muted: oklch(0.955 0.014 92);
-  --muted-foreground: oklch(0.52 0.025 110);
+  --muted-foreground: color-mix(in srgb, var(--ink) 68%, transparent);
 
   --accent: oklch(0.93 0.035 130);
-  --accent-foreground: oklch(0.32 0.05 140);
+  --accent-foreground: var(--ink);
 
   --cream: oklch(0.972 0.026 92);
   --ivory: oklch(0.99 0.012 96);
@@ -78,20 +80,28 @@
   --input: oklch(0.91 0.02 92);
   --ring: oklch(0.86 0.11 95);
 
-  --gradient-hero: radial-gradient(
-      120% 90% at 15% 0%,
-      color-mix(in oklab, var(--primary) 34%, transparent) 0%,
-      transparent 55%
+  --shadow-ink: oklch(0.28 0.032 120);
+
+  --grid-line: color-mix(in srgb, oklch(0.55 0.01 100) 22%, transparent);
+  --grid-size: 64px;
+  --gradient-grid: repeating-linear-gradient(
+      to right,
+      var(--grid-line) 0 1px,
+      transparent 1px var(--grid-size)
     ),
+    repeating-linear-gradient(to bottom, var(--grid-line) 0 1px, transparent 1px var(--grid-size));
+
+  --gradient-hero: var(--gradient-grid),
+    radial-gradient(120% 90% at 15% 0%, color-mix(in oklab, var(--primary) 34%, transparent) 0%, transparent 55%),
     radial-gradient(90% 80% at 95% 10%, color-mix(in oklab, var(--leaf-soft) 26%, transparent) 0%, transparent 60%),
     linear-gradient(180deg, var(--ivory) 0%, var(--cream) 100%);
   --gradient-primary: linear-gradient(135deg, var(--primary) 0%, color-mix(in oklab, var(--primary) 62%, white) 100%);
   --gradient-card: linear-gradient(160deg, var(--ivory) 0%, color-mix(in oklab, var(--cream) 80%, white) 100%);
 
-  --shadow-soft: 0 2px 8px -4px color-mix(in oklab, var(--foreground) 10%, transparent),
-    0 12px 32px -18px color-mix(in oklab, var(--foreground) 22%, transparent);
-  --shadow-lift: 0 8px 20px -8px color-mix(in oklab, var(--foreground) 14%, transparent),
-    0 28px 60px -30px color-mix(in oklab, var(--foreground) 30%, transparent);
+  --shadow-soft: 0 2px 8px -4px color-mix(in oklab, var(--shadow-ink) 10%, transparent),
+    0 12px 32px -18px color-mix(in oklab, var(--shadow-ink) 22%, transparent);
+  --shadow-lift: 0 8px 20px -8px color-mix(in oklab, var(--shadow-ink) 14%, transparent),
+    0 28px 60px -30px color-mix(in oklab, var(--shadow-ink) 30%, transparent);
   --shadow-glow: 0 18px 46px -18px color-mix(in oklab, var(--primary) 70%, transparent);
 
   --transition-smooth: 400ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -104,6 +114,8 @@
 
   body {
     background-color: var(--color-background);
+    background-image: var(--gradient-grid);
+    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
