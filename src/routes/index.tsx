@@ -197,9 +197,6 @@ function Index() {
 
       <main className="relative mx-auto max-w-6xl px-5 pb-24 sm:px-8">
         <section className="mx-auto max-w-3xl pt-10 text-center sm:pt-16">
-          <p className="animate-rise-in text-xs uppercase tracking-[0.32em] text-muted-foreground">
-            Powered by Bonji Intelligence
-          </p>
           <h1 className="animate-rise-in mt-5 text-5xl leading-[1.05] sm:text-6xl md:text-7xl">AI Skin Analysis</h1>
           <p className="animate-rise-in mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             Upload a selfie or use your camera and let our AI read your skin in seconds — a gentle, personalised
