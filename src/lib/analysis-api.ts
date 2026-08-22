@@ -38,7 +38,7 @@ export type AnalysisResult = {
 
 export const API_BASE_URL: string =
   (import.meta.env['VITE_ANALYSIS_API_URL'] as string | undefined)?.replace(/\/$/, "") ??
-  "http://localhost:8000";
+  "https://bonji-rag-backend.onrender.com";
 
 const POSITIVE_KEYS = ["shine", "hydration", "health", "moisture", "elasticity", "smoothness"];
 
